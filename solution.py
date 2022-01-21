@@ -10,16 +10,14 @@ def solution(data_train,data_test)
     X_cv = data_test.iloc[:,0:98]
     y_cv = data_test.price
 
-
-
-    from sklearn.linear_model import RidgeCV
+    #RidgeCV model
     clf1 = RidgeCV(alphas=4, normalize=True)
     clf1.fit(X_train,y_train)
     clf1.score(X_train,y_train)
     pred1 = clf1.predict(X_cv)
 
 
-
+    #LassoCV model
     clf2 = LassoCV(alphas=4, normalize=True)
     clf2.fit(X_train,y_train)
     clf2.score(X_train,y_train)
