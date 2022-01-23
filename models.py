@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.pyplot as plt
 from pyparsing import alphas
 import cnn 
 import seaborn as sns
@@ -42,8 +41,6 @@ def pca(d1):
     return pca_data_train
 
 def linear(x_train,y_train):
-    print('this is x train',x_train)
-    print('this is y train',y_train)
     #Linear Regression 
     reg = linear_model.LinearRegression()
     reg.fit(x_train, y_train)
@@ -65,13 +62,13 @@ def ridge(x_train,y_train):
     
 def main():
     
-    rdata_train = visualize(x_train,y_train)
-    rdata_train = pd.DataFrame(rdata_train)
+    #rdata_train = visualize(x_train,y_train)
+    #rdata_train = pd.DataFrame(rdata_train)
     #npcadata_train = pca(data_train)
     #correlationmatrix(npcadata_train)
-    linear_result = linear(rdata_train,y_train)
+    #linear_result = linear(rdata_train,y_train)
     #ridge_result = ridge(x_train,y_train)
-    #cnn_result = cnn.cnn_model(x_train,y_train)
+    cnn_result = cnn.cnn_model(x_train,y_train,x_test,y_test)
     
 if __name__ == "__main__":
     main()

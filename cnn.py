@@ -1,33 +1,34 @@
-from tensorflow.keras.layers import Input, Lambda, Dense, Flatten,Conv2D
-from tensorflow.keras.models import Model
-from tensorflow.keras.applications.vgg19 import VGG19
-from tensorflow.keras.applications.resnet50 import preprocess_input
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.preprocessing.image import ImageDataGenerator,load_img
-from tensorflow.keras.models import Sequential
-import numpy as np
-from glob import glob
+import pandas as pd
+import keras
+from tensorflow import keras
 import matplotlib.pyplot as plt
-from tensorflow.keras.layers import MaxPooling2D
+from tensorflow.keras import layers
+from keras.models import Sequential,Input,Model
+from keras.layers import Dense, Dropout, Flatten
+from keras.layers import Conv2D, MaxPooling2D
+#from keras.layers.normalization import BatchNormalization
+from keras.layers.advanced_activations import LeakyReLU
 
-def cnn_model(x_train,y_train):
-    model=Sequential()
-    model.add(Conv2D(filters=16,kernel_size=2,padding="same",activation="relu",input_shape=(224,224,3)))
+batch_size = 10
+epochs = 10
 
-    #add 2 layers
-    model.add(MaxPooling2D(pool_size=2))
-    model.add(Conv2D(filters=32,kernel_size=2,padding="same",activation ="relu"))
-    model.add(MaxPooling2D(pool_size=2))
-    model.add(Conv2D(filters=64,kernel_size=2,padding="same",activation="relu"))
-    model.add(MaxPooling2D(pool_size=2))
+def cnn_model(x_train,y_train,x_test,y_test):
+    # define the keras model
+    model = Sequential()
+    model.add(Dense(5, input_dim=98, activation='sigmoid'))
+    model.add(Dense(3, activation='relu'))
+    model.add(Dense(3, activation='relu'))
+    model.add(Dense(2, activation='relu'))
+    model.add(Dense(1, activation='sigmoid'))
+    model.compile(loss='mean_squared_logarithmic_error', optimizer='adam', metrics=['accuracy'])
+    model.summary()
 
-    #flattening
-    model.add(Flatten())
 
-    #add layers
-    model.add(Dense(500,activation="relu"))
-    model.add(Dense(2,activation="softmax"))
+    model_train= model.fit(x_train, y_train, epochs=epochs, batch_size=batch_size)
 
-    #model.fit_generator(training_set,validation_data=test_set,epochs=50, steps_per_epoch=len(training_set), validation_steps=len(test_set) )
+    test_eval = model.evaluate(x_test, y_test, verbose=0)
+    print('Test loss:', test_eval[0])
+    print('Test accuracy:', test_eval[1])
 
-    
+
+
