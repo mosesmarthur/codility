@@ -17,9 +17,6 @@ def cnn_model(x_train,y_train,x_test,y_test):
     model = Sequential()
     model.add(Dense(5, input_dim=98, activation='sigmoid'))
     model.add(Dense(3, activation='relu'))
-    model.add(Dense(3, activation='relu'))
-    model.add(Dense(2, activation='relu'))
-    model.add(Dense(1, activation='sigmoid'))
     model.compile(loss='mean_squared_logarithmic_error', optimizer='adam', metrics=['accuracy'])
     model.summary()
 
