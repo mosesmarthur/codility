@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from pyparsing import alphas
+from tenacity import RetryAction
 import cnn 
 import seaborn as sns
 import plotly.express as px
@@ -10,6 +11,9 @@ from sklearn import linear_model
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.ensemble import ExtraTreesClassifier
+from sklearn import svm
+from sklearn import metrics
+
 
 data_train = pd.read_csv('data_train.csv')
 data_test = pd.read_csv('data_test.csv')
@@ -20,16 +24,19 @@ x_test = data_test.iloc[:,0:98]
 y_test = data_test['price']
 
 
-def visualize(d1,d2):
+def visualize(d1,d2,d3):
     model = ExtraTreesClassifier()
     model.fit(d1,d2)
     #print(model.feature_importances_) #use inbuilt class feature_importances of tree based classifiers
     #plot graph of feature importances for better visualization
     feat_importances = pd.Series(model.feature_importances_, index=d1.columns)
     feat_importances.nlargest(10).plot(kind='barh')
-    feat_importances = feat_importances.nlargest(10)    
+    feat_importances = feat_importances.nlargest(10)
+    print(d1[feat_importances.keys()])
+    print(d3[feat_importances.keys()])
+
     #plt.show()
-    return d1[feat_importances.keys()]
+    return d1[feat_importances.keys()],d3[feat_importances.keys()]
 
 def pca(d1):
     ndata_train = StandardScaler().fit_transform(d1) # normalizing the features
@@ -40,35 +47,55 @@ def pca(d1):
     print(pca_data_train)
     return pca_data_train
 
-def linear(x_train,y_train):
+def linear(d1,d2,d3,d4):
+    d1 = pd.DataFrame(d1)
+    d2 = pd.DataFrame(d2)
     #Linear Regression 
-    reg = linear_model.LinearRegression()
-    reg.fit(x_train, y_train)
+    clf = linear_model.LinearRegression()
+    clf.fit(d1, d2)
     result = {}
-    result['score'] = reg.score(x_train, y_train)
-    result['Coeff'] = reg.coef_  
+    result['score'] = clf.score(d1, d2)
+    result['Coeff'] = clf.coef_  
     print('This is Linear',result)  
+    
+    y_pred = clf.predict(d3)
+    mae = metrics.mean_absolute_error(d4, y_pred)
+    mse = metrics.mean_squared_error(d4, y_pred)
+    r2 = metrics.r2_score(d4, y_pred)
+
+    print("The model performance for testing set")
+    print("--------------------------------------")
+    print('MAE is {}'.format(mae))
+    print('MSE is {}'.format(mse))
+    print('R2 score is {}'.format(r2))
+
     return result
+
 
 def ridge(x_train,y_train):
     #Ridge CV
-    reg = linear_model.RidgeCV(alphas=np.logspace(-6, 6, 13))
-    reg.fit(x_train,y_train)
-    score = reg.score(x_train, y_train)
+    clf = linear_model.RidgeCV(alphas=np.logspace(-6, 6, 13))
+    clf.fit(x_train,y_train)
+    score = clf.score(x_train, y_train)
     result = {}
-    result['score'] = reg.score(x_train, y_train)
-    result['Coeff'] = reg.coef_    
+    result['score'] = clf.score(x_train, y_train)
+    result['Coeff'] = clf.coef_    
     return result
     
+
 def main():
     
-    #rdata_train = visualize(x_train,y_train)
-    #rdata_train = pd.DataFrame(rdata_train)
+    rdata_train, rdata_test = visualize(x_train,y_train,x_test)
+    rdata_train = pd.DataFrame(rdata_train)
+    rdata_test = pd.DataFrame(rdata_test)
+
+    #rdata_test = visualize(x_test,y_test)
+    #print(rdata_test)
     #npcadata_train = pca(data_train)
     #correlationmatrix(npcadata_train)
-    #linear_result = linear(rdata_train,y_train)
+    linear_result = linear(rdata_train,y_train,rdata_test,y_test)
     #ridge_result = ridge(x_train,y_train)
-    cnn_result = cnn.cnn_model(x_train,y_train,x_test,y_test)
+    #cnn_result = cnn.cnn_model(x_train,y_train,x_test,y_test)
     
 if __name__ == "__main__":
     main()
