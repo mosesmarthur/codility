@@ -54,7 +54,7 @@ def linear(d1,d2,d3,d4):
     clf = linear_model.LinearRegression()
     clf.fit(d1, d2)
     result = {}
-    result['score'] = clf.score(d1, d2)
+    result['score'] = clf.score(d3, d4)
     result['Coeff'] = clf.coef_  
     
     y_pred = clf.predict(d3)
@@ -92,7 +92,30 @@ def ridge(d1,d2,d3,d4):
     print('R2 score is {}'.format(r2))
 
     return result
+
+def lasso(d1,d2,d3,d4):
+    #Ridge CV
+    clf = linear_model.LassoCV()
+    clf.fit(d1,d2)
+
+    result = {}
+    result['score'] = clf.score(d3, d4)
+    result['Coeff'] = clf.coef_  
     
+    y_pred = clf.predict(d3)
+    mae = metrics.mean_absolute_error(d4, y_pred)
+    mse = metrics.mean_squared_error(d4, y_pred)
+    r2 = metrics.r2_score(d4, y_pred)
+
+    print("The Lasso model performance for testing set")
+    print("--------------------------------------")
+    print('MAE is {}'.format(mae))
+    print('MSE is {}'.format(mse))
+    print('R2 score is {}'.format(r2))
+
+    return result
+    
+
 def main():
     
     rdata_train, rdata_test = visualize(x_train,y_train,x_test)
@@ -101,9 +124,10 @@ def main():
 
     #rdata_test = visualize(x_test,y_test)
     #npcadata_train = pca(data_train)
-    #correlationmatrix(npcadata_train)
     #linear_result = linear(rdata_train,y_train,rdata_test,y_test)
+    #lasso_result = lasso(rdata_train,y_train,rdata_test,y_test)
     ridge_result = ridge(rdata_train,y_train,rdata_test,y_test)
+
     #cnn_result = cnn.cnn_model(x_train,y_train,x_test,y_test)
     
 if __name__ == "__main__":
