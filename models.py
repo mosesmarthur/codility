@@ -112,9 +112,31 @@ def lasso(d1,d2,d3,d4):
     print('MAE is {}'.format(mae))
     print('MSE is {}'.format(mse))
     print('R2 score is {}'.format(r2))
+    print('These are the Parameters',clf.get_params())
 
     return result
     
+def elasticnet(d1,d2,d3,d4):
+    clf = linear_model.ElasticNetCV(cv=5, random_state=0)
+    clf.fit(d1,d2)
+
+    result = {}
+    result['score'] = clf.score(d1, d2)
+    result['Coeff'] = clf.coef_  
+    print(result)
+
+    y_pred = clf.predict(d3)
+    mae = metrics.mean_absolute_error(d4, y_pred)
+    mse = metrics.mean_squared_error(d4, y_pred)
+    r2 = metrics.r2_score(d4, y_pred)
+
+    print("The Elasticnet performance for testing set")
+    print("--------------------------------------")
+    print('MAE is {}'.format(mae))
+    print('MSE is {}'.format(mse))
+    print('R2 score is {}'.format(r2))
+    print('This is the Param', clf.get_params())
+    return result
 
 def main():
     
@@ -126,10 +148,10 @@ def main():
     #npcadata_train = pca(data_train)
     #linear_result = linear(rdata_train,y_train,rdata_test,y_test)
     #lasso_result = lasso(rdata_train,y_train,rdata_test,y_test)
-    ridge_result = ridge(rdata_train,y_train,rdata_test,y_test)
-
+    #ridge_result = ridge(rdata_train,y_train,rdata_test,y_test)
+    elastic_net = elasticnet(rdata_train,y_train,rdata_test,y_test)
     #cnn_result = cnn.cnn_model(x_train,y_train,x_test,y_test)
-    
+
 if __name__ == "__main__":
     main()
 
