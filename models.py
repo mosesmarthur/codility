@@ -13,16 +13,26 @@ from sklearn.decomposition import PCA
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn import svm
 from sklearn import metrics
-
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
 
 data_train = pd.read_csv('data_train.csv')
 data_test = pd.read_csv('data_test.csv')
+
 x_train = data_train.iloc[:,0:98]
 y_train = data_train['price']
 
 x_test = data_test.iloc[:,0:98]
 y_test = data_test['price']
 
+
+def printfn(model,mae,mse,r2,clf):
+    print("The Performance of ",model, "model")
+    print("--------------------------------------")
+    print('MAE is {}'.format(mae))
+    print('MSE is {}'.format(mse))
+    print('R2 score is {}'.format(r2))
+    print('These are the Parameters',clf.get_params())
 
 def visualize(d1,d2,d3):
     model = ExtraTreesClassifier()
@@ -36,7 +46,7 @@ def visualize(d1,d2,d3):
     print(d3[feat_importances.keys()])
 
     #plt.show()
-    return d1[feat_importances.keys()],d3[feat_importances.keys()]
+    return d1[feat_importances.keys()], d3[feat_importances.keys()]
 
 def pca(d1):
     ndata_train = StandardScaler().fit_transform(d1) # normalizing the features
@@ -50,9 +60,25 @@ def pca(d1):
 def linear(d1,d2,d3,d4):
     d1 = pd.DataFrame(d1)
     d2 = pd.DataFrame(d2)
+
     #Linear Regression 
     clf = linear_model.LinearRegression()
-    clf.fit(d1, d2)
+    clf.fit(d1, np.ravel(d2))
+    result = {}
+    result['score'] = clf.score(d3, d4)
+    result['Coeff'] = clf.coef_  
+    
+    y_pred = clf.predict(d3)
+    mae = metrics.mean_absolute_error(d4, y_pred)
+    mse = metrics.mean_squared_error(d4, y_pred)
+    r2 = metrics.r2_score(d4, y_pred)
+    model = 'Linear'
+    printfn(model,mae,mse,r2,clf)
+
+    #Lasso CV
+    clf = linear_model.LassoCV()
+    clf.fit(d1,np.ravel(d2))
+
     result = {}
     result['score'] = clf.score(d3, d4)
     result['Coeff'] = clf.coef_  
@@ -62,21 +88,14 @@ def linear(d1,d2,d3,d4):
     mse = metrics.mean_squared_error(d4, y_pred)
     r2 = metrics.r2_score(d4, y_pred)
 
-    print("The Linear model performance for testing set")
-    print("--------------------------------------")
-    print('MAE is {}'.format(mae))
-    print('MSE is {}'.format(mse))
-    print('R2 score is {}'.format(r2))
+    model = 'Lasso'
+    printfn(model,mae,mse,r2,clf)
 
-    return result
-
-def ridge(d1,d2,d3,d4):
     #Ridge CV
     clf = linear_model.RidgeCV()
-    clf.fit(d1,d2)
-    score = clf.score(d1, d2)
+    clf.fit(d1,np.ravel(d2))
     result = {}
-    result['score'] = clf.score(d1, d2)
+    result['score'] = clf.score(d1, np.ravel(d2))
     result['Coeff'] = clf.coef_  
     print(result)
 
@@ -84,41 +103,13 @@ def ridge(d1,d2,d3,d4):
     mae = metrics.mean_absolute_error(d4, y_pred)
     mse = metrics.mean_squared_error(d4, y_pred)
     r2 = metrics.r2_score(d4, y_pred)
+    model = 'Ridge'
+    printfn(model,mae,mse,r2,clf)
 
-    print("The RidgeCV performance for testing set")
-    print("--------------------------------------")
-    print('MAE is {}'.format(mae))
-    print('MSE is {}'.format(mse))
-    print('R2 score is {}'.format(r2))
-
-    return result
-
-def lasso(d1,d2,d3,d4):
-    #Ridge CV
-    clf = linear_model.LassoCV()
-    clf.fit(d1,d2)
-
-    result = {}
-    result['score'] = clf.score(d3, d4)
-    result['Coeff'] = clf.coef_  
     
-    y_pred = clf.predict(d3)
-    mae = metrics.mean_absolute_error(d4, y_pred)
-    mse = metrics.mean_squared_error(d4, y_pred)
-    r2 = metrics.r2_score(d4, y_pred)
-
-    print("The Lasso model performance for testing set")
-    print("--------------------------------------")
-    print('MAE is {}'.format(mae))
-    print('MSE is {}'.format(mse))
-    print('R2 score is {}'.format(r2))
-    print('These are the Parameters',clf.get_params())
-
-    return result
-    
-def elasticnet(d1,d2,d3,d4):
+    #ElasticNEt
     clf = linear_model.ElasticNetCV(cv=5, random_state=0)
-    clf.fit(d1,d2)
+    clf.fit(d1,np.ravel(d2))
 
     result = {}
     result['score'] = clf.score(d1, d2)
@@ -129,29 +120,54 @@ def elasticnet(d1,d2,d3,d4):
     mae = metrics.mean_absolute_error(d4, y_pred)
     mse = metrics.mean_squared_error(d4, y_pred)
     r2 = metrics.r2_score(d4, y_pred)
+    
+    model = 'Elastic Net'
+    printfn(model,mae,mse,r2,clf)
 
-    print("The Elasticnet performance for testing set")
-    print("--------------------------------------")
-    print('MAE is {}'.format(mae))
-    print('MSE is {}'.format(mse))
-    print('R2 score is {}'.format(r2))
-    print('This is the Param', clf.get_params())
-    return result
+
+
+def ensambled(d1,d2,d3,d4):
+    model = 'Decision Tree'
+    clf = DecisionTreeClassifier(max_depth=None, min_samples_split=2,
+        random_state=0)
+    clf.fit(d1,d2)
+
+    scores = clf.score(d3, d4)
+    print(scores.mean())
+
+    y_pred = clf.predict(d3)
+    mae = metrics.mean_absolute_error(d4, y_pred)
+    mse = metrics.mean_squared_error(d4, y_pred)
+    r2 = metrics.r2_score(d4, y_pred)
+    printfn(model,mae,mse,r2,clf)
+
+    model = 'Random Forest'
+    clf = RandomForestClassifier(n_estimators=10, max_depth=None,
+        min_samples_split=2, random_state=0)
+    clf.fit(d1,d2)
+
+    scores = clf.score(d3, d4)
+    print(scores.mean())
+
+    y_pred = clf.predict(d3)
+    mae = metrics.mean_absolute_error(d4, y_pred)
+    mse = metrics.mean_squared_error(d4, y_pred)
+    r2 = metrics.r2_score(d4, y_pred)
+    printfn(model,mae,mse,r2,clf)
+
+
 
 def main():
     
-    rdata_train, rdata_test = visualize(x_train,y_train,x_test)
+    rdata_train,rdata_test = visualize(x_train,y_train, x_test)
     rdata_train = pd.DataFrame(rdata_train)
     rdata_test = pd.DataFrame(rdata_test)
 
-    #rdata_test = visualize(x_test,y_test)
     #npcadata_train = pca(data_train)
-    #linear_result = linear(rdata_train,y_train,rdata_test,y_test)
-    #lasso_result = lasso(rdata_train,y_train,rdata_test,y_test)
-    #ridge_result = ridge(rdata_train,y_train,rdata_test,y_test)
-    elastic_net = elasticnet(rdata_train,y_train,rdata_test,y_test)
+    linear(rdata_train,y_train,rdata_test,y_test)
+    #emsabled = ensambled(rdata_train,y_train,rdata_test,y_test)
     #cnn_result = cnn.cnn_model(x_train,y_train,x_test,y_test)
-
+    
 if __name__ == "__main__":
     main()
 
