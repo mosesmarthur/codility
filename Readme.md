@@ -7,7 +7,7 @@ Predictor variable - 'price'
 ### data_test.csv 
 The test set dimension (10, 99)
 
-## Regression models 
+## Models 
 **Linear Regression**
 * Lasso Regression
 * Ridge Regression
@@ -17,6 +17,9 @@ The test set dimension (10, 99)
 **Ensemble Methods**
 * Decision Tree
 * Random Forest
+
+**Deep Learning**
+* CNN
 
 
 
