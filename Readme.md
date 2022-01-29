@@ -8,13 +8,13 @@ Predictor variable - 'price'
 The test set dimension (10, 99)
 
 ## Regression models 
-** Linear Regression **
+**Linear Regression**
 * Lasso Regression
 * Ridge Regression
 * Elastic Net Regression
 
 
-** Ensemble Methods **
+**Ensemble Methods**
 * Decision Tree
 * Random Forest
 
