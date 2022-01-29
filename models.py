@@ -22,6 +22,7 @@ data_test = pd.read_csv('data_test.csv')
 x_train = data_train.iloc[:,0:98]
 y_train = data_train['price']
 
+
 x_test = data_test.iloc[:,0:98]
 y_test = data_test['price']
 
@@ -158,7 +159,7 @@ def ensambled(d1,d2,d3,d4):
 
 
 def main():
-    
+
     rdata_train,rdata_test = visualize(x_train,y_train, x_test)
     rdata_train = pd.DataFrame(rdata_train)
     rdata_test = pd.DataFrame(rdata_test)
